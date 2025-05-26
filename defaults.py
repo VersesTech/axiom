@@ -37,7 +37,6 @@ class ExperimentConfig:
     use_unused_counter: bool = True
     project: str = "axiom"
     precision_type: str = "float32"
-    simple: bool = False  # use simpler games
     layer_for_dynamics: int = 0  # which layer to use for dynamics
     warmup_smm: bool = False  # warmup SMM
     num_warmup_steps: int = 50
@@ -251,9 +250,7 @@ def get_defaults(parser):
     # do Bayesian model reduction every n steps
     parser.add_argument("--prune_every", type=int, default=500)
 
-    # Use complex / perturbed game versions
-    parser.add_argument("--complex", action="store_true", required=False)
-
+    # Use perturbed game versions
     parser.add_argument(
         "--perturb",
         type=str,
@@ -510,7 +507,6 @@ def parse_args(args=None):
         used_threshold=tuple(used_thresholds),
         min_track_steps=tuple(min_track_steps),
         prune_every=args.prune_every,
-        simple=not args.complex,
         layer_for_dynamics=args.layer_for_dynamics,
         warmup_smm=args.warmup_smm,
         num_warmup_steps=args.num_warmup_steps,

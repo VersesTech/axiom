@@ -6,7 +6,7 @@ Expanding Object-Centric Models.
 
 ## Installation
 
-Install using pip:
+Install using pip in an environment with python3.11:
 
 ```
 pip install -e .
