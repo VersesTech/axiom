@@ -11,7 +11,7 @@ import equinox as eqx
 
 from axiom.vi.utils import bdot
 from axiom.vi.models.hybrid_mixture_model import HybridMixture
-from axiom.models.hybrid_utils import create_mm, train_step_fn
+from axiom.models.utils_hybrid import create_mm, train_step_fn
 
 
 @dataclass(frozen=True)
