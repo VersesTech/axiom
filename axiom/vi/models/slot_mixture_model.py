@@ -316,17 +316,3 @@ def _m_step_keep_unused(
         after_mask = grow_mask
 
     return _combine_params(pi, likelihood, new_pi, new_likelihood, after_mask)
-
-
-def add_position_encoding(img):
-    u, v = jnp.meshgrid(jnp.arange(img.shape[1]), jnp.arange(img.shape[0]))
-
-    data = jnp.concatenate(
-        [
-            (u.reshape(-1, 1)),
-            (v.reshape(-1, 1)),
-            img.reshape(-1, img.shape[-1]),
-        ],
-        axis=1,
-    )
-    return data

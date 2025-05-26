@@ -14,9 +14,8 @@ from axiom.vi import ArrayDict, Distribution
 from axiom.vi.utils import bdot
 
 
-from axiom.models.slot_mixture_model import (
+from axiom.vi.models.slot_mixture_model import (
     SlotMixtureModel,
-    add_position_encoding,
     _inputs_to_delta,
     _m_step_keep_unused,
 )
@@ -119,9 +118,9 @@ def _create_slot_mask(
         probs = jnp.ones(m.shape[0]) / m.shape[0]
     else:
         probs = jnp.asarray(probs)
-        assert (
-            probs.shape[0] == m.shape[0]
-        ), f"Probs shape should equal {m.shape[0]} but is instead {probs.shape[0]}"
+        assert probs.shape[0] == m.shape[0], (
+            f"Probs shape should equal {m.shape[0]} but is instead {probs.shape[0]}"
+        )
 
     key, subkey = jr.split(key)
     p = jr.choice(subkey, jnp.arange(m.shape[0]), p=probs, shape=(num_components,))
@@ -279,6 +278,20 @@ def create_smm(
             "stdevs": jnp.array([width / 2, height / 2, 128, 128, 128]),
         },
     )
+
+
+def add_position_encoding(img):
+    u, v = jnp.meshgrid(jnp.arange(img.shape[1]), jnp.arange(img.shape[0]))
+
+    data = jnp.concatenate(
+        [
+            (u.reshape(-1, 1)),
+            (v.reshape(-1, 1)),
+            img.reshape(-1, img.shape[-1]),
+        ],
+        axis=1,
+    )
+    return data
 
 
 def format_single_frame(single_obs, offset, stdevs):

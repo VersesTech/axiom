@@ -10,7 +10,8 @@ from jaxtyping import Array
 import equinox as eqx
 
 from axiom.vi.utils import bdot
-from axiom.models.hybrid_mixture_model import HybridMixture, create_mm, train_step_fn
+from axiom.vi.models.hybrid_mixture_model import HybridMixture
+from axiom.models.hybrid_utils import create_mm, train_step_fn
 
 
 @dataclass(frozen=True)
@@ -79,14 +80,7 @@ def create_imm(
     return imm
 
 
-def infer_remapped_color_identity(
-    imm,
-    obs,
-    object_idx,
-    num_features,
-    **kwargs,
-):
-
+def infer_remapped_color_identity(imm, obs, object_idx, num_features, **kwargs):
     # this method is called when we want to explicitly trigger remapping based on shape only
     object_features = obs[object_idx, None, obs.shape[-1] - num_features :, None]
     object_features = object_features.at[:, 2:, :].set(object_features[:, 2:, :] * 100)

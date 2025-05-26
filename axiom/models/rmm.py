@@ -16,7 +16,8 @@ import equinox as eqx
 from axiom.models import tmm as tmm_tools
 from axiom.models import imm as imm_tools
 
-from axiom.models.hybrid_mixture_model import HybridMixture, create_mm, train_step_fn
+from axiom.vi.models.hybrid_mixture_model import HybridMixture
+from axiom.models.utils_hybrid import create_mm, train_step_fn
 
 
 @dataclass(frozen=True)
@@ -841,13 +842,46 @@ def consider_merge(c_data, d_data, elbo_before, mixture, used_mask, idx_1, idx_2
     )
 
 
+@jax.jit
+def compute_elbo(mm, c_data, d_data):
+    """
+    NOTE: not the full elbo. This only accounts for the likelihoods on the TMM switch
+    and the reward, and only considers the prior complexities. As these are the only
+    ones we want to optimize for in BMR
+    """
+    mask = mm.prior.alpha > mm.prior.prior_alpha
+
+    # Only account for the TMM and reward likelihoods!
+
+    # First calculate predicted qz's
+    qz_predict, *_ = mm._e_step(
+        c_data, d_data, w_disc=jnp.ones(len(d_data)).at[-2:].set(0)
+    )
+
+    # Then calculate ELL for the TMM and reward likelihoods
+    *_, d_ell = mm._e_step(c_data, d_data, w_disc=jnp.zeros(len(d_data)).at[-2:].set(1))
+
+    # Remove unused components
+    d_ell = d_ell * mask[None]
+
+    # And get ELL for inferred qz as elbo contrib
+    d_ell = jax.vmap(lambda i, j: d_ell[i, j])(
+        jnp.arange(d_ell.shape[0]), qz_predict.argmax(-1)
+    )
+
+    _elbo_contrib = d_ell.mean()
+    _elbo = _elbo_contrib - mm.prior.kl_divergence()
+
+    return _elbo
+
+
 def run_bmr(key, rmm, n_samples, pairs=None, cxm=None, dxm=None):
     if cxm is None:
         cxm, dxm = rmm.model.get_means_as_data()
         cxm = cxm[rmm.used_mask > 0]
         dxm = jtu.tree_map(lambda d: d[rmm.used_mask > 0], dxm)
 
-    initial_elbo = rmm.model.compute_elbo(cxm, dxm)
+    initial_elbo = compute_elbo(rmm.model, cxm, dxm)
 
     def step_fn(carry, pair):
         mixture, used_mask, elbo = carry
