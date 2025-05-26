@@ -827,7 +827,7 @@ def consider_merge(c_data, d_data, elbo_before, mixture, used_mask, idx_1, idx_2
     mixture_after._merge_clusters(idx_1, idx_2)
     mask_after = used_mask.at[idx_2].set(0)
 
-    elbo_after = mixture_after.compute_elbo(c_data, d_data)
+    elbo_after = compute_elbo(mixture_after, c_data, d_data)
 
     def replace_fn():
         return mixture_after, mask_after, elbo_after, True

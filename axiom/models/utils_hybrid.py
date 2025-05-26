@@ -6,6 +6,7 @@ import equinox as eqx
 
 from axiom.vi import ArrayDict
 from axiom.vi.conjugate import Multinomial, MultivariateNormal
+from axiom.vi.models.hybrid_mixture_model import HybridMixture
 
 
 def create_mm(
