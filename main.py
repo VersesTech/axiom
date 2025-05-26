@@ -32,16 +32,10 @@ def main(config):
 
     # Create environment.
     if config.perturb is None:
-        env = create_gameworld_env(
-            config.game,
-            config.simple,
-        )
+        env = create_gameworld_env(config.game)
     else:
         env = create_gameworld_env_perturbed(
-            config.game,
-            config.simple,
-            perturb=config.perturb,
-            perturb_step=config.perturb_step,
+            config.game, perturb=config.perturb, perturb_step=config.perturb_step
         )
 
     observations = []
