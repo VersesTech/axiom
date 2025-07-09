@@ -270,7 +270,7 @@ def get_distance(x_t, i, j, o=0.1):
     cx_j, cy_j, w_j, h_j = x_t[j, [0, 1, 6, 7]]
     d = jnp.array([cx_i - cx_j, cy_i - cy_j])
     interacting = interacting_squares(
-        cx_i, cy_i, w_i + o, h_i + o, cx_j, cy_j, w_j, h_j
+        cx_i, cy_i, w_i + o, h_i + o, cx_j, cy_j, w_j + o, h_j + o
     )
     return interacting, d, d / jnp.array([w_i, h_i])
 
